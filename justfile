@@ -4,13 +4,17 @@
 default:
     @just --list
 
-# Set up WiFi networks
+# Install/upgrade Homebrew
 wifi:
-    ansible-playbook playbooks/wifi/playbook.yml --ask-become-pass --ask-vault-pass
+    ansible-playbook playbooks/homebrew/playbook.yml
 
 # Install determinate-nix
 nix:
     ansible-playbook playbooks/nix/playbook.yml --ask-become-pass
+
+# Set up WiFi networks
+wifi:
+    ansible-playbook playbooks/wifi/playbook.yml --ask-become-pass --ask-vault-pass
 
 # Run all playbooks
 all:
@@ -18,7 +22,7 @@ all:
 
 # Check playbooks
 check:
-    ansible-playbook site.yml --ask-become-pass --ask-vault-pass --check --syntax-check
+    ansible-playbook site.yml --ask-vault-pass --check --syntax-check
 
 # Manage vault
 vault:
@@ -27,9 +31,3 @@ vault:
 # Change password and re-encrypt vault
 rekey-vault:
     ansible-vault rekey vars/vault.yml
-
-# Clean up tree
-clean:
-    @find . -type f -name "*.retry" -delete
-    @rm -rf /tmp/ansible_facts
-    @echo "✓ Cleaned"
