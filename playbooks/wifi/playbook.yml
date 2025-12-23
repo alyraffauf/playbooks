@@ -1,0 +1,48 @@
+---
+# WiFi Setup Playbook
+# Usage: ansible-playbook playbook.yml --ask-become-pass --ask-vault-pass
+
+- name: Set up WiFi networks
+  hosts: localhost
+  become: true
+  vars_files:
+    - ../../vars/vault.yml
+
+  tasks:
+    - name: Create WPA2-PSK WiFi connection files
+      ansible.builtin.template:
+        src: templates/wpa2.nmconnection.j2
+        dest: "/etc/NetworkManager/system-connections/{{ item.ssid }}.nmconnection"
+        mode: "0600"
+        owner: root
+        group: root
+      loop: "{{ networks | selectattr('type', 'equalto', 'wpa2') | list }}"
+      notify: Reload NetworkManager
+      no_log: true
+
+    - name: Create open WiFi connection files
+      ansible.builtin.template:
+        src: templates/open.nmconnection.j2
+        dest: "/etc/NetworkManager/system-connections/{{ item.ssid }}.nmconnection"
+        mode: "0600"
+        owner: root
+        group: root
+      loop: "{{ networks | selectattr('type', 'equalto', 'open') | list }}"
+      notify: Reload NetworkManager
+
+    - name: Create EAP WiFi connection files
+      ansible.builtin.template:
+        src: templates/eap.nmconnection.j2
+        dest: "/etc/NetworkManager/system-connections/{{ item.ssid }}.nmconnection"
+        mode: "0600"
+        owner: root
+        group: root
+      loop: "{{ networks | selectattr('type', 'equalto', 'eap') | list }}"
+      notify: Reload NetworkManager
+      no_log: true
+
+  handlers:
+    - name: Reload NetworkManager
+      ansible.builtin.command:
+        cmd: nmcli connection reload
+      changed_when: true

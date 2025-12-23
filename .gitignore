@@ -1,0 +1,50 @@
+# Ansible
+*.retry
+.vault_pass
+.vault_password
+vault_password
+ansible_collections/
+collections/
+
+# Temporary files
+/tmp/
+*.tmp
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Ansible facts cache
+/tmp/ansible_facts
+ansible_facts/
+fact_cache/
+
+# Logs
+*.log
+
+# IDE / Editor
+.vscode/
+.idea/
+*.iml
+.DS_Store
+
+# Local testing
+test_inventory.yml
+local_vars.yml
+
+# Backup files
+*.bak
+*.backup
+
+# Don't ignore vault files (they should be encrypted)
+# If you want to ignore them, uncomment:
+# vars/vault.yml

@@ -1,0 +1,13 @@
+---
+# Site-wide playbook - Run all configurations
+# Usage: ansible-playbook site.yml --ask-become-pass --ask-vault-pass
+
+- name: Set up WiFi networks
+  import_playbook: playbooks/wifi/playbook.yml
+
+- name: Install Determinate Nix
+  import_playbook: playbooks/nix/playbook.yml
+# Add more playbooks here as you create them:
+# - import_playbook: playbooks/packages/playbook.yml
+# - import_playbook: playbooks/dotfiles/playbook.yml
+# - import_playbook: playbooks/users/playbook.yml
