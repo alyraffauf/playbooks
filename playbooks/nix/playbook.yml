@@ -71,7 +71,7 @@
     - name: Display success message
       ansible.builtin.debug:
         msg: |
-          ✓ Determinate Nix installed successfully!
+          Determinate Nix installed successfully!
 
           To use Nix in your current shell, run:
             source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
@@ -83,5 +83,5 @@
 
     - name: Display already installed message
       ansible.builtin.debug:
-        msg: "✓ Nix is already installed (found /nix/receipt.json)"
+        msg: "Nix is already installed (found /nix/receipt.json)"
       when: nix_receipt.stat.exists

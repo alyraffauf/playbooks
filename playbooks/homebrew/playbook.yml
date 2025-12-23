@@ -77,7 +77,7 @@
     - name: Display success message for new installation
       ansible.builtin.debug:
         msg: |
-          ✓ Homebrew installed successfully!
+          Homebrew installed successfully!
 
           To use Homebrew in your current shell, add it to your PATH:
             eval "$({{ homebrew_prefix }}/bin/brew shellenv)"
@@ -90,5 +90,5 @@
 
     - name: Display success message for update
       ansible.builtin.debug:
-        msg: "✓ Homebrew has been updated to the latest version!"
+        msg: "Homebrew has been updated to the latest version!"
       when: brew_binary.stat.exists
