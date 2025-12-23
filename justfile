@@ -5,7 +5,7 @@ default:
     @just --list
 
 # Install/upgrade Homebrew
-wifi:
+brew:
     ansible-playbook playbooks/homebrew/playbook.yml
 
 # Install determinate-nix
