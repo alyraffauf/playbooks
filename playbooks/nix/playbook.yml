@@ -34,7 +34,7 @@
         force: true
       when: not nix_receipt.stat.exists
 
-    - name: Install Determinate Nix (unattended)
+    - name: Install Determinate Nix
       ansible.builtin.command:
         cmd: "{{ nix_installer_path }} install --no-confirm"
       register: nix_install_result
@@ -58,7 +58,7 @@
         path: /nix/receipt.json
       register: nix_installed
 
-    - name: Verify Nix daemon is running (systemd systems)
+    - name: Verify Nix is running
       ansible.builtin.systemd:
         name: nix-daemon
         state: started
