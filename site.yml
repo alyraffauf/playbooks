@@ -5,6 +5,9 @@
 - name: Set up WiFi networks
   import_playbook: playbooks/wifi/playbook.yml
 
+- name: Install/Upgrade Homebrew
+  import_playbook: playbooks/homebrew/playbook.yml
+
 - name: Install Determinate Nix
   import_playbook: playbooks/nix/playbook.yml
 # Add more playbooks here as you create them:
