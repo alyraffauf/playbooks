@@ -1,0 +1,8 @@
+---
+# WiFi role handlers
+
+- name: Reload NetworkManager
+  ansible.builtin.command:
+    cmd: nmcli connection reload
+  changed_when: true
+  become: true

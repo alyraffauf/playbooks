@@ -1,0 +1,81 @@
+---
+# Homebrew role - Install or update Homebrew on Linux
+
+- name: Gather system facts
+  ansible.builtin.setup:
+
+- name: Verify running on Linux
+  ansible.builtin.fail:
+    msg: "This playbook is designed for Linux systems only"
+  when: ansible_facts.system != "Linux"
+
+- name: Check if Homebrew is already installed
+  ansible.builtin.stat:
+    path: "{{ homebrew_prefix }}/bin/brew"
+  register: brew_binary
+
+- name: Display Homebrew installation status
+  ansible.builtin.debug:
+    msg: "Homebrew is {{ 'already installed' if brew_binary.stat.exists else 'not installed' }}"
+
+- name: Download Homebrew installer
+  ansible.builtin.get_url:
+    url: "{{ homebrew_installer_url }}"
+    dest: "{{ homebrew_installer_path }}"
+    mode: "0755"
+    force: true
+  when: not brew_binary.stat.exists
+
+- name: Install Homebrew
+  ansible.builtin.shell:
+    cmd: "NONINTERACTIVE=1 {{ homebrew_installer_path }}"
+  register: brew_install_result
+  changed_when: brew_install_result.rc == 0
+  when: not brew_binary.stat.exists
+
+- name: Display installation output
+  ansible.builtin.debug:
+    var: brew_install_result.stdout_lines
+  when: not brew_binary.stat.exists and brew_install_result.stdout_lines is defined
+
+- name: Clean up installer script
+  ansible.builtin.file:
+    path: "{{ homebrew_installer_path }}"
+    state: absent
+  when: not brew_binary.stat.exists
+
+- name: Update Homebrew if already installed
+  ansible.builtin.command:
+    cmd: "{{ homebrew_prefix }}/bin/brew update"
+  register: brew_update_result
+  changed_when: "'Already up-to-date' not in brew_update_result.stdout"
+  when: brew_binary.stat.exists
+
+- name: Display update output
+  ansible.builtin.debug:
+    var: brew_update_result.stdout_lines
+  when: brew_binary.stat.exists and brew_update_result.stdout_lines is defined
+
+- name: Verify Homebrew installation
+  ansible.builtin.stat:
+    path: "{{ homebrew_prefix }}/bin/brew"
+  register: brew_installed
+
+- name: Display success message for new installation
+  ansible.builtin.debug:
+    msg: |
+      Homebrew installed successfully!
+
+      To use Homebrew in your current shell, add it to your PATH:
+        eval "$({{ homebrew_prefix }}/bin/brew shellenv)"
+
+      Or add this line to your ~/.bashrc or ~/.zshrc:
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+      Test with: brew --version
+  when: brew_installed.stat.exists and not brew_binary.stat.exists
+
+- name: Display success message for update
+  ansible.builtin.debug:
+    msg: "Homebrew has been updated to the latest version!"
+  when: brew_binary.stat.exists

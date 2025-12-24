@@ -1,0 +1,6 @@
+---
+# Nix role - Default variables
+
+nix_installer_url: "https://install.determinate.systems/nix"
+nix_installer_version: "latest"  # or pin to specific version like "v0.6.0"
+nix_installer_path: "/tmp/nix-installer.sh"

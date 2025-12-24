@@ -1,0 +1,37 @@
+---
+# WiFi role - Configure NetworkManager WiFi connections
+
+- name: Create WPA2-PSK WiFi connection files
+  ansible.builtin.template:
+    src: wpa2.nmconnection.j2
+    dest: "/etc/NetworkManager/system-connections/{{ item.ssid }}.nmconnection"
+    mode: "0600"
+    owner: root
+    group: root
+  loop: "{{ networks | selectattr('type', 'equalto', 'wpa2') | list }}"
+  notify: Reload NetworkManager
+  become: true
+  no_log: true
+
+- name: Create open WiFi connection files
+  ansible.builtin.template:
+    src: open.nmconnection.j2
+    dest: "/etc/NetworkManager/system-connections/{{ item.ssid }}.nmconnection"
+    mode: "0600"
+    owner: root
+    group: root
+  loop: "{{ networks | selectattr('type', 'equalto', 'open') | list }}"
+  notify: Reload NetworkManager
+  become: true
+
+- name: Create EAP WiFi connection files
+  ansible.builtin.template:
+    src: eap.nmconnection.j2
+    dest: "/etc/NetworkManager/system-connections/{{ item.ssid }}.nmconnection"
+    mode: "0600"
+    owner: root
+    group: root
+  loop: "{{ networks | selectattr('type', 'equalto', 'eap') | list }}"
+  notify: Reload NetworkManager
+  become: true
+  no_log: true

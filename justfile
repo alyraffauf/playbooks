@@ -6,15 +6,15 @@ default:
 
 # Install/upgrade Homebrew
 brew:
-    ansible-playbook playbooks/homebrew/playbook.yml
+    ansible-playbook site.yml --tags homebrew
 
 # Install determinate-nix
 nix:
-    ansible-playbook playbooks/nix/playbook.yml --ask-become-pass
+    ansible-playbook site.yml --tags nix --ask-become-pass
 
 # Set up WiFi networks
 wifi:
-    ansible-playbook playbooks/wifi/playbook.yml --ask-become-pass --ask-vault-pass
+    ansible-playbook site.yml --tags wifi --ask-become-pass --ask-vault-pass
 
 # Run all playbooks
 all:

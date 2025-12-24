@@ -1,0 +1,23 @@
+[connection]
+id={{ item.ssid }}
+uuid={{ 99999999999 | random | to_uuid }}
+type=wifi
+autoconnect=true
+
+[wifi]
+mode=infrastructure
+ssid={{ item.ssid }}
+
+[wifi-security]
+auth-alg=open
+key-mgmt=wpa-psk
+psk={{ item.password }}
+
+[ipv4]
+method=auto
+
+[ipv6]
+addr-gen-mode=default
+method=auto
+
+[proxy]
