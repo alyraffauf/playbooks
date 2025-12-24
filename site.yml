@@ -6,15 +6,25 @@
   hosts: localhost
   connection: local
   gather_facts: true
-  vars_files:
-    - vars/vault.yml
 
-  roles:
-    - role: homebrew
+  tasks:
+    - name: Load vault variables for WiFi
+      ansible.builtin.include_vars:
+        file: vars/vault.yml
+      tags: wifi
+      no_log: true
+
+    - name: Run Homebrew role
+      ansible.builtin.include_role:
+        name: homebrew
       tags: homebrew
 
-    - role: nix
+    - name: Run Nix role
+      ansible.builtin.include_role:
+        name: nix
       tags: nix
 
-    - role: wifi
+    - name: Run WiFi role
+      ansible.builtin.include_role:
+        name: wifi
       tags: wifi

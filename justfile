@@ -22,7 +22,7 @@ all:
 
 # Check playbooks
 check:
-    ansible-playbook site.yml --ask-vault-pass --check --syntax-check
+    ansible-playbook site.yml --check --syntax-check
 
 # Manage vault
 vault:
