@@ -1,0 +1,7 @@
+---
+# NFS mounts role - Default variables
+
+nfs_mounts: []
+
+nfs_default_options: "defaults,noatime,nofail,retrans=2,rsize=1048576,wsize=1048576,fsc,_netdev"
+nfs_default_timeout: "60"

@@ -16,6 +16,10 @@ nix:
 wifi:
     ansible-playbook site.yml --tags wifi --ask-become-pass --ask-vault-pass
 
+# Set up NFS mounts
+nfs:
+    ansible-playbook site.yml --tags nfs --ask-become-pass
+
 # Run all playbooks
 all:
     ansible-playbook site.yml --ask-become-pass --ask-vault-pass

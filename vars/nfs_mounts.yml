@@ -1,0 +1,8 @@
+---
+# NFS mounts configuration
+
+nfs_mounts:
+  - name: Media
+    what: jubilife:/mnt/Media
+  - name: Data
+    what: jubilife:/mnt/Data

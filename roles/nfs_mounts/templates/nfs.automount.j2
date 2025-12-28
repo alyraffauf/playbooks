@@ -1,0 +1,11 @@
+[Unit]
+Description=Automount for {{ item.name }} NFS share
+After=network-online.target
+After=tailscaled.service
+
+[Automount]
+Where={{ nfs_mount_base }}/{{ item.name }}
+TimeoutIdleSec={{ item.timeout | default(nfs_default_timeout) }}
+
+[Install]
+WantedBy=multi-user.target

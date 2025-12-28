@@ -14,6 +14,11 @@
       tags: wifi
       no_log: true
 
+    - name: Load NFS mounts configuration
+      ansible.builtin.include_vars:
+        file: vars/nfs_mounts.yml
+      tags: nfs
+
     - name: Run Homebrew role
       ansible.builtin.include_role:
         name: homebrew
@@ -28,3 +33,8 @@
       ansible.builtin.include_role:
         name: wifi
       tags: wifi
+
+    - name: Run NFS mounts role
+      ansible.builtin.import_role:
+        name: nfs_mounts
+      tags: nfs

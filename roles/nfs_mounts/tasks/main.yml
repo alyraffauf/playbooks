@@ -1,0 +1,54 @@
+---
+# NFS mounts role - Configure systemd automount for NFS shares
+
+- name: Check for immutable bootc/ostree variant
+  ansible.builtin.stat:
+    path: /usr/lib/ostree-boot
+  register: ostree_check
+
+- name: Set mount base path for immutable distros
+  ansible.builtin.set_fact:
+    nfs_mount_base: "/var/mnt"
+  when: ostree_check.stat.exists
+
+- name: Set mount base path for mutable distros
+  ansible.builtin.set_fact:
+    nfs_mount_base: "/mnt"
+  when: not ostree_check.stat.exists
+
+- name: Ensure mount directories exist
+  ansible.builtin.file:
+    path: "{{ nfs_mount_base }}/{{ item.name }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ nfs_mounts }}"
+  become: true
+
+- name: Create systemd mount units
+  ansible.builtin.template:
+    src: nfs.mount.j2
+    dest: "/etc/systemd/system/{{ (nfs_mount_base + '/' + item.name) | replace('/', '-') | regex_replace('^-', '') }}.mount"
+    mode: "0644"
+    owner: root
+    group: root
+  loop: "{{ nfs_mounts }}"
+  become: true
+
+- name: Create systemd automount units
+  ansible.builtin.template:
+    src: nfs.automount.j2
+    dest: "/etc/systemd/system/{{ (nfs_mount_base + '/' + item.name) | replace('/', '-') | regex_replace('^-', '') }}.automount"
+    mode: "0644"
+    owner: root
+    group: root
+  loop: "{{ nfs_mounts }}"
+  become: true
+
+- name: Enable and start automounts
+  ansible.builtin.systemd:
+    name: "{{ (nfs_mount_base + '/' + item.name) | replace('/', '-') | regex_replace('^-', '') }}.automount"
+    state: started
+    enabled: true
+    daemon_reload: true
+  loop: "{{ nfs_mounts }}"
+  become: true
