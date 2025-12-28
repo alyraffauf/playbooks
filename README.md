@@ -5,32 +5,27 @@ Declarative system configuration with Ansible.
 ## Usage
 
 ```bash
-just wifi        # Configure WiFi networks
-just nix         # Install Nix package manager
-just all         # Run all playbooks
-just check       # Validate playbooks
-just vault       # Edit encrypted secrets
-just rekey-vault # Change vault password
+just                # Show all commands
+just list           # List available roles
+just all            # Run all playbooks
+just check          # Validate playbooks
+just vault          # Edit encrypted secrets
+just rekey-vault    # Change vault password
 ```
 
 ## Structure
 
 ```
-roles/           # Reusable Ansible roles
-├── wifi/        # WiFi network management
-├── nix/         # Nix installation
-└── homebrew/    # Homebrew package manager
+roles/              # Reusable Ansible roles (see: just list)
 vars/
-└── vault.yml    # Encrypted secrets (AES256)
-site.yml         # Main playbook that uses all roles
+└── vault.yml       # Encrypted secrets (AES256)
+site.yml            # Main playbook
 ```
 
-## Adding New Roles
+## Configuration
 
-1. Create role structure: `mkdir -p roles/name/{tasks,handlers,templates,defaults}`
-2. Create `roles/name/tasks/main.yml` with your tasks
-3. Add role to `site.yml` with appropriate tags
-4. Add command to `justfile` (optional)
-5. Add secrets to `vars/vault.yml` if needed
+- `vars/vault.yml` - Encrypted credentials (edit with `just vault`)
+- `vars/nfs_mounts.yml` - NFS mount definitions
+- `roles/*/defaults/main.yml` - Default variables for each role
 
-See `roles/README.md` and existing roles for examples.
+See `roles/README.md` for more details.
