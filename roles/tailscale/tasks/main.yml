@@ -1,0 +1,58 @@
+---
+# Tailscale role - Install and configure Tailscale VPN
+
+- name: Check if Tailscale is installed
+  ansible.builtin.command:
+    cmd: which tailscale
+  register: tailscale_binary
+  changed_when: false
+  failed_when: false
+
+- name: Install Tailscale
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://tailscale.com/install.sh | sh
+  when: tailscale_binary.rc != 0
+  become: true
+
+- name: Enable and start tailscaled service
+  ansible.builtin.systemd:
+    name: tailscaled
+    state: started
+    enabled: true
+  become: true
+
+- name: Check if Tailscale is authenticated
+  ansible.builtin.command:
+    cmd: tailscale status
+  register: tailscale_status
+  changed_when: false
+  failed_when: false
+  become: true
+
+- name: Authenticate and configure Tailscale with auth key
+  ansible.builtin.command:
+    cmd: "tailscale up {{ tailscale_up_flags }} --authkey={{ tailscale_authkey }}"
+  when:
+    - tailscale_status.rc != 0
+    - tailscale_authkey is defined
+  become: true
+  no_log: true
+
+- name: Authenticate and configure Tailscale without auth key
+  ansible.builtin.command:
+    cmd: "tailscale up {{ tailscale_up_flags }}"
+  when:
+    - tailscale_status.rc != 0
+    - tailscale_authkey is not defined
+  become: true
+
+- name: Display Tailscale status
+  ansible.builtin.command:
+    cmd: tailscale status
+  register: final_status
+  changed_when: false
+  become: true
+
+- name: Show Tailscale status
+  ansible.builtin.debug:
+    var: final_status.stdout_lines

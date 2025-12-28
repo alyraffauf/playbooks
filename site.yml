@@ -8,16 +8,23 @@
   gather_facts: true
 
   tasks:
-    - name: Load vault variables for WiFi
+    - name: Load vault variables
       ansible.builtin.include_vars:
         file: vars/vault.yml
-      tags: wifi
+      tags:
+        - wifi
+        - tailscale
       no_log: true
 
-    - name: Load NFS mounts configuration
+    - name: Load NFS mounts
       ansible.builtin.include_vars:
         file: vars/nfs_mounts.yml
       tags: nfs
+
+    - name: Run Tailscale role
+      ansible.builtin.import_role:
+        name: tailscale
+      tags: tailscale
 
     - name: Run Homebrew role
       ansible.builtin.include_role:
@@ -29,12 +36,12 @@
         name: nix
       tags: nix
 
-    - name: Run WiFi role
-      ansible.builtin.include_role:
-        name: wifi
-      tags: wifi
-
     - name: Run NFS mounts role
       ansible.builtin.import_role:
         name: nfs_mounts
       tags: nfs
+
+    - name: Run WiFi role
+      ansible.builtin.include_role:
+        name: wifi
+      tags: wifi

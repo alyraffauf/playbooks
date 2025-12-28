@@ -1,0 +1,4 @@
+---
+# Tailscale role - Default variables
+
+tailscale_up_flags: "--ssh --operator=aly"
