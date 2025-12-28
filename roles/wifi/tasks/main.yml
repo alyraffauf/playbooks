@@ -9,9 +9,9 @@
     owner: root
     group: root
   loop: "{{ networks | selectattr('type', 'equalto', 'wpa2') | list }}"
-  notify: Reload NetworkManager
   become: true
   no_log: true
+  register: wpa2_result
 
 - name: Create open WiFi connection files
   ansible.builtin.template:
@@ -21,8 +21,8 @@
     owner: root
     group: root
   loop: "{{ networks | selectattr('type', 'equalto', 'open') | list }}"
-  notify: Reload NetworkManager
   become: true
+  register: open_result
 
 - name: Create EAP WiFi connection files
   ansible.builtin.template:
@@ -32,6 +32,20 @@
     owner: root
     group: root
   loop: "{{ networks | selectattr('type', 'equalto', 'eap') | list }}"
-  notify: Reload NetworkManager
   become: true
   no_log: true
+  register: eap_result
+
+- name: Reload NetworkManager
+  ansible.builtin.command:
+    cmd: nmcli connection reload
+  when: wpa2_result.changed or open_result.changed or eap_result.changed
+  changed_when: true
+  become: true
+
+- name: Wait for internet connection
+  ansible.builtin.wait_for:
+    host: 1.1.1.1
+    port: 443
+    timeout: 30
+  when: wpa2_result.changed or open_result.changed or eap_result.changed
