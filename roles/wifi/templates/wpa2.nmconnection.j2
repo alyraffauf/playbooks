@@ -1,6 +1,6 @@
 [connection]
 id={{ item.ssid }}
-uuid={{ 99999999999 | random | to_uuid }}
+uuid={{ item.ssid | to_uuid }}
 type=wifi
 autoconnect=true
 
