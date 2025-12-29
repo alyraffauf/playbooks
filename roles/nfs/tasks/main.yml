@@ -33,6 +33,7 @@
     group: root
   loop: "{{ nfs_mounts }}"
   become: true
+  register: mount_units_result
 
 - name: Create systemd automount units
   ansible.builtin.template:
@@ -43,12 +44,28 @@
     group: root
   loop: "{{ nfs_mounts }}"
   become: true
+  register: automount_units_result
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: mount_units_result.changed or automount_units_result.changed
+  become: true
+
+- name: Restart automounts when configuration changed
+  ansible.builtin.systemd:
+    name: "{{ (nfs_mount_base + '/' + item.name) | replace('/', '-') | regex_replace('^-', '') }}.automount"
+    state: restarted
+    enabled: true
+  loop: "{{ nfs_mounts }}"
+  when: mount_units_result.changed or automount_units_result.changed
+  become: true
 
 - name: Enable and start automounts
   ansible.builtin.systemd:
     name: "{{ (nfs_mount_base + '/' + item.name) | replace('/', '-') | regex_replace('^-', '') }}.automount"
     state: started
     enabled: true
-    daemon_reload: true
   loop: "{{ nfs_mounts }}"
+  when: not (mount_units_result.changed or automount_units_result.changed)
   become: true

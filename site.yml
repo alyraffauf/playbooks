@@ -38,7 +38,7 @@
 
     - name: Run NFS mounts role
       ansible.builtin.import_role:
-        name: nfs_mounts
+        name: nfs
       tags: nfs
 
     - name: Run WiFi role
