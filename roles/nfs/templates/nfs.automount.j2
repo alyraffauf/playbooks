@@ -1,7 +1,5 @@
 [Unit]
 Description=Automount for {{ item.name }} NFS share
-After=network-online.target
-After=tailscaled.service
 
 [Automount]
 Where={{ nfs_mount_base }}/{{ item.name }}
