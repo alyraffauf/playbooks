@@ -27,12 +27,12 @@
       tags: tailscale
 
     - name: Run Homebrew role
-      ansible.builtin.include_role:
+      ansible.builtin.import_role:
         name: homebrew
       tags: homebrew
 
     - name: Run Nix role
-      ansible.builtin.include_role:
+      ansible.builtin.import_role:
         name: nix
       tags: nix
 
@@ -42,6 +42,6 @@
       tags: nfs
 
     - name: Run WiFi role
-      ansible.builtin.include_role:
+      ansible.builtin.import_role:
         name: wifi
       tags: wifi
