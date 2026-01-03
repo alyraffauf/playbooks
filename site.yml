@@ -21,6 +21,11 @@
         file: vars/nfs_mounts.yml
       tags: nfs
 
+    - name: Load Syncthing configuration
+      ansible.builtin.include_vars:
+        file: vars/syncthing.yml
+      tags: syncthing
+
     - name: Run Tailscale role
       ansible.builtin.import_role:
         name: tailscale
@@ -45,3 +50,8 @@
       ansible.builtin.import_role:
         name: wifi
       tags: wifi
+
+    - name: Run Syncthing role
+      ansible.builtin.import_role:
+        name: syncthing
+      tags: syncthing

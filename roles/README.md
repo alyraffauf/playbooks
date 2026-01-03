@@ -32,6 +32,7 @@ ansible-playbook site.yml --tags nfs --ask-become-pass
 
 - `vars/vault.yml` - Encrypted credentials (WiFi passwords, Tailscale auth key)
 - `vars/nfs_mounts.yml` - NFS mount definitions
+- `vars/syncthing.yml` - Syncthing folders and devices
 - `roles/*/defaults/main.yml` - Default variables for each role
 
 Edit vault:

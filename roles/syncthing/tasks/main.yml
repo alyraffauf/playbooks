@@ -1,0 +1,163 @@
+---
+# Syncthing role - Install and configure Syncthing using CLI
+
+- name: Get user home directory
+  ansible.builtin.set_fact:
+    syncthing_home: "{{ lookup('env', 'HOME') }}"
+
+- name: Check if Syncthing binary is installed
+  ansible.builtin.command:
+    cmd: which syncthing
+  register: syncthing_binary
+  changed_when: false
+  failed_when: false
+
+- name: Check if Syncthing flatpak is installed
+  ansible.builtin.shell:
+    cmd: flatpak list --app --columns=application | grep com.github.zocker_160.SyncThingy
+  register: syncthing_flatpak
+  changed_when: false
+  failed_when: false
+  when: syncthing_binary.rc != 0
+
+- name: Install Syncthing flatpak
+  ansible.builtin.command:
+    cmd: flatpak install -y --noninteractive flathub com.github.zocker_160.SyncThingy
+  when:
+    - syncthing_binary.rc != 0
+    - syncthing_flatpak.rc != 0
+
+- name: Fail if Syncthing installation failed
+  ansible.builtin.fail:
+    msg: "Syncthing installation failed. Please install it manually."
+  when:
+    - syncthing_binary.rc != 0
+    - syncthing_flatpak.rc != 0
+
+- name: Set command prefix for system binary
+  ansible.builtin.set_fact:
+    syncthing_base_cmd: "syncthing"
+    syncthing_using_flatpak: false
+  when: syncthing_binary.rc == 0
+
+- name: Set command prefix for flatpak
+  ansible.builtin.set_fact:
+    syncthing_base_cmd: "flatpak run --command=syncthing com.github.zocker_160.SyncThingy"
+    syncthing_using_flatpak: true
+  when: syncthing_binary.rc != 0
+
+- name: Detect Syncthing version
+  ansible.builtin.shell:
+    cmd: "{{ syncthing_base_cmd }} --version | head -1 | grep -oP 'v\\K[0-9]+'"
+  register: syncthing_version
+  changed_when: false
+  failed_when: false
+
+- name: Set commands for detected version
+  ansible.builtin.set_fact:
+    syncthing_cli_cmd: "{{ syncthing_base_cmd }} cli"
+    syncthing_device_id_cmd: "{{ syncthing_base_cmd }} {{ '--device-id' if syncthing_version.stdout == '1' else 'device-id' }}"
+    syncthing_generate_cmd: "{{ syncthing_base_cmd }} generate --no-default-folder"
+
+- name: Ensure Syncthing config directory exists
+  ansible.builtin.file:
+    path: "{{ syncthing_home }}/.local/state/syncthing"
+    state: directory
+    mode: "0755"
+
+- name: Check if Syncthing has been initialized
+  ansible.builtin.stat:
+    path: "{{ syncthing_home }}/.local/state/syncthing/config.xml"
+  register: syncthing_config
+
+- name: Initialize Syncthing configuration
+  ansible.builtin.command:
+    cmd: "{{ syncthing_generate_cmd }}"
+  when: not syncthing_config.stat.exists
+
+- name: Get current Syncthing device ID
+  ansible.builtin.command:
+    cmd: "{{ syncthing_device_id_cmd }}"
+  register: current_device_id
+  changed_when: false
+
+- name: Enable and start Syncthing user service
+  ansible.builtin.systemd:
+    name: syncthing
+    state: started
+    enabled: "{{ syncthing_service_enabled }}"
+    scope: user
+  when: not syncthing_using_flatpak
+
+- name: Wait for Syncthing API to be ready
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: 8384
+    timeout: 30
+
+- name: Get existing devices
+  ansible.builtin.command:
+    cmd: "{{ syncthing_cli_cmd }} config devices list"
+  register: existing_devices
+  changed_when: false
+
+- name: Add remote devices
+  ansible.builtin.command:
+    cmd: '{{ syncthing_cli_cmd }} config devices add --device-id "{{ item.value.id }}" --name "{{ item.key }}"'
+  loop: "{{ syncthing_devices | dict2items }}"
+  when: item.value.id not in existing_devices.stdout
+  failed_when: false
+
+- name: Get existing folders
+  ansible.builtin.command:
+    cmd: "{{ syncthing_cli_cmd }} config folders list"
+  register: existing_folders
+  changed_when: false
+
+- name: Add new folders
+  ansible.builtin.command:
+    cmd: '{{ syncthing_cli_cmd }} config folders add --id "{{ item.value.id }}" --label "{{ item.key }}" --path "{{ item.value.path | regex_replace(''~'', syncthing_home) }}"'
+  loop: "{{ syncthing_folders | dict2items }}"
+  when:
+    - item.value.path is not none
+    - item.value.id not in existing_folders.stdout
+  failed_when: false
+
+- name: Update existing folder attributes
+  ansible.builtin.shell:
+    cmd: |
+      {{ syncthing_cli_cmd }} config folders "{{ item.value.id }}" path set "{{ item.value.path | regex_replace('^~', syncthing_home) }}"
+      {{ syncthing_cli_cmd }} config folders "{{ item.value.id }}" label set "{{ item.key }}"
+  loop: "{{ syncthing_folders | dict2items }}"
+  when:
+    - item.value.path is not none
+    - item.value.id in existing_folders.stdout
+  failed_when: false
+
+- name: Create folder directories
+  ansible.builtin.file:
+    path: "{{ item.value.path | regex_replace('^~', syncthing_home) }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ syncthing_folders | dict2items }}"
+  when: item.value.path is not none
+
+- name: Share folders with devices
+  ansible.builtin.command:
+    cmd: '{{ syncthing_cli_cmd }} config folders "{{ item.0.value.id }}" devices add --device-id "{{ syncthing_devices[item.1].id }}"'
+  loop: "{{ syncthing_folders | dict2items | subelements('value.devices') }}"
+  when: item.1 in syncthing_devices
+  failed_when: false
+
+- name: Configure folder versioning
+  ansible.builtin.shell:
+    cmd: |
+      {{ syncthing_cli_cmd }} config folders "{{ item.value.id }}" versioning type set "{{ item.value.versioning.type }}"
+      {% for param_key, param_value in item.value.versioning.params.items() %}
+      {{ syncthing_cli_cmd }} config folders "{{ item.value.id }}" versioning params set "{{ param_key }}" "{{ param_value }}"
+      {% endfor %}
+  loop: "{{ syncthing_folders | dict2items }}"
+  when:
+    - item.value.versioning is not none
+    - item.value.versioning.type is defined
+  failed_when: false

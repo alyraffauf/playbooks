@@ -1,0 +1,41 @@
+---
+# Syncthing configuration
+
+# Syncthing devices with their IDs
+syncthing_devices:
+  eterna:
+    id: "ZAD2MVO-I2OQII4-C3T756B-BEBQMM6-Q4ILH2H-5CR3TMI-DR4VBFD-GLRVOQK"
+  jubilife:
+    id: "52MTCMC-PKEWSAU-HADMTZU-DY5EKFO-B323P7V-OBXLNTQ-EJY7F7Y-EUWFBQX"
+
+# Syncthing folders with their configurations
+syncthing_folders:
+  sync:
+    id: "default"
+    path: "~/Sync"
+    devices:
+      - eterna
+      - jubilife
+    versioning:
+      type: "trashcan"
+      params:
+        cleanoutDays: "5"
+
+  screenshots:
+    id: "screenshots"
+    path: "~/Pictures/Screenshots"
+    devices:
+      - jubilife
+      - eterna
+    versioning:
+      type: "trashcan"
+      params:
+        cleanoutDays: "5"
+
+  roms:
+    id: "emudeck"
+    path: "~/ROMs"
+    devices:
+      - eterna
+      - jubilife
+    versioning: null

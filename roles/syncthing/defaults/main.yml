@@ -1,0 +1,30 @@
+---
+# Syncthing role - Default variables
+# Override these in vars/syncthing.yml with your actual configuration
+
+# Syncthing devices with their IDs
+# Example:
+#   syncthing_devices:
+#     server1:
+#       id: "XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX"
+#     server2:
+#       id: "YYYYYYY-YYYYYYY-YYYYYYY-YYYYYYY-YYYYYYY-YYYYYYY-YYYYYYY-YYYYYYY"
+syncthing_devices: {}
+
+# Syncthing folders with their configurations
+# Example:
+#   syncthing_folders:
+#     sync:
+#       id: "default"
+#       path: "~/Sync"
+#       devices:
+#         - server1
+#         - server2
+#       versioning:
+#         type: "trashcan"
+#         params:
+#           cleanoutDays: "5"
+syncthing_folders: {}
+
+# Syncthing service management
+syncthing_service_enabled: true
