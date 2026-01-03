@@ -23,6 +23,7 @@
 - name: Install Syncthing flatpak
   ansible.builtin.command:
     cmd: flatpak install -y --noninteractive flathub com.github.zocker_160.SyncThingy
+  register: syncthing_install_result
   when:
     - syncthing_binary.rc != 0
     - syncthing_flatpak.rc != 0
@@ -33,6 +34,8 @@
   when:
     - syncthing_binary.rc != 0
     - syncthing_flatpak.rc != 0
+    - syncthing_install_result is not skipped
+    - syncthing_install_result.rc != 0
 
 - name: Set command prefix for system binary
   ansible.builtin.set_fact:
