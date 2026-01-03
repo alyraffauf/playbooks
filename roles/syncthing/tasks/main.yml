@@ -57,7 +57,7 @@
   ansible.builtin.set_fact:
     syncthing_cli_cmd: "{{ syncthing_base_cmd }} cli"
     syncthing_device_id_cmd: "{{ syncthing_base_cmd }} {{ '--device-id' if syncthing_version.stdout == '1' else 'device-id' }}"
-    syncthing_generate_cmd: "{{ syncthing_base_cmd }} generate --no-default-folder"
+    syncthing_generate_cmd: "{{ syncthing_base_cmd }} generate{{ ' --no-default-folder' if syncthing_version.stdout == '1' else '' }}"
 
 - name: Ensure Syncthing config directory exists
   ansible.builtin.file:
