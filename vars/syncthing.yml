@@ -7,7 +7,8 @@ syncthing_devices:
     id: "ZAD2MVO-I2OQII4-C3T756B-BEBQMM6-Q4ILH2H-5CR3TMI-DR4VBFD-GLRVOQK"
   jubilife:
     id: "52MTCMC-PKEWSAU-HADMTZU-DY5EKFO-B323P7V-OBXLNTQ-EJY7F7Y-EUWFBQX"
-
+  snowpoint:
+    id: "TFSZWZB-EDIFV2P-333APP2-T655TM4-2XGA7QA-P22Z36W-3RNGX2C-DLETAQ7"
 # Syncthing folders with their configurations
 syncthing_folders:
   sync:
@@ -16,6 +17,7 @@ syncthing_folders:
     devices:
       - eterna
       - jubilife
+      - snowpoint
     versioning:
       type: "trashcan"
       params:
@@ -27,6 +29,7 @@ syncthing_folders:
     devices:
       - jubilife
       - eterna
+      - snowpoint
     versioning:
       type: "trashcan"
       params:
