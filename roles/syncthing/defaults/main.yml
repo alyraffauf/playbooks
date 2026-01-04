@@ -7,6 +7,7 @@
 #   syncthing_devices:
 #     server1:
 #       id: "XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX"
+#       introducer: true  # Optional: mark this device as an introducer
 #     server2:
 #       id: "YYYYYYY-YYYYYYY-YYYYYYY-YYYYYYY-YYYYYYY-YYYYYYY-YYYYYYY-YYYYYYY"
 syncthing_devices: {}

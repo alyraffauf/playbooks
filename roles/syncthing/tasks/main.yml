@@ -111,6 +111,15 @@
   when: item.value.id not in existing_devices.stdout
   failed_when: false
 
+- name: Configure devices as introducers
+  ansible.builtin.command:
+    cmd: '{{ syncthing_cli_cmd }} config devices "{{ item.value.id }}" introducer set true'
+  loop: "{{ syncthing_devices | dict2items }}"
+  when:
+    - item.value.introducer is defined
+    - item.value.introducer | bool
+  failed_when: false
+
 - name: Get existing folders
   ansible.builtin.command:
     cmd: "{{ syncthing_cli_cmd }} config folders list"
