@@ -92,6 +92,11 @@
     scope: user
   when: not syncthing_using_flatpak
 
+- name: Start Syncthing flatpak in background
+  ansible.builtin.shell:
+    cmd: "nohup flatpak run com.github.zocker_160.SyncThingy </dev/null >/dev/null 2>&1 &"
+  when: syncthing_using_flatpak
+
 - name: Wait for Syncthing API to be ready
   ansible.builtin.wait_for:
     host: 127.0.0.1
