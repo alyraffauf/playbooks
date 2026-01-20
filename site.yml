@@ -55,3 +55,8 @@
       ansible.builtin.import_role:
         name: syncthing
       tags: syncthing
+
+    - name: Run Flatpak role
+      ansible.builtin.import_role:
+        name: flatpak
+      tags: flatpak

@@ -1,0 +1,8 @@
+---
+# Flatpak role - Default variables
+
+# Flathub repository URL
+flathub_url: "https://dl.flathub.org/repo/flathub.flatpakrepo"
+
+# Fedora flatpaks remote name (to be removed)
+fedora_flatpaks_remote: "fedora"
