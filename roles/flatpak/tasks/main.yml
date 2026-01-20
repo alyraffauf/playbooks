@@ -10,7 +10,7 @@
 
 - name: Get list of flatpak remotes
   ansible.builtin.command:
-    cmd: flatpak remotes --columns=name
+    cmd: flatpak remotes --system --columns=name
   register: flatpak_remotes
   changed_when: false
   failed_when: false
@@ -41,12 +41,12 @@
 
 - name: Add Flathub remote
   ansible.builtin.command:
-    cmd: flatpak remote-add --if-not-exists flathub "{{ flathub_url }}"
+    cmd: flatpak remote-add --system --if-not-exists flathub "{{ flathub_url }}"
   when: is_fedora and has_fedora_remote and not has_flathub_remote
 
 - name: Reinstall Fedora flatpaks from Flathub
   ansible.builtin.shell:
-    cmd: flatpak install -y --reinstall flathub $(flatpak list --app-runtime=org.fedoraproject.Platform --columns=application | tail -n +1)
+    cmd: flatpak install --system -y --reinstall flathub $(flatpak list --system --app-runtime=org.fedoraproject.Platform --columns=application | tail -n +1)
   when: is_fedora and has_fedora_remote
   register: reinstall_result
   changed_when: reinstall_result.rc == 0
@@ -61,7 +61,7 @@
 
 - name: Remove Fedora flatpaks remote
   ansible.builtin.command:
-    cmd: flatpak remote-delete -y "{{ fedora_flatpaks_remote }}"
+    cmd: flatpak remote-delete --system -y "{{ fedora_flatpaks_remote }}"
   when: is_fedora and has_fedora_remote
   register: remote_delete_result
   failed_when: false
