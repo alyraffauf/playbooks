@@ -1,0 +1,12 @@
+---
+- name: Reload tuned profile
+  ansible.builtin.command:
+    cmd: tuned-adm profile {{ power_tuned_profile }}
+  become: true
+
+- name: Enable btintel-pcie suspend workaround
+  ansible.builtin.systemd:
+    name: btintel-pcie-suspend.service
+    enabled: true
+    daemon_reload: true
+  become: true

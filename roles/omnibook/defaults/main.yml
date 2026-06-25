@@ -1,0 +1,23 @@
+---
+# omnibook role - Power management tuning for HP OmniBook Ultra Flip 14 (board 8CDE, Lunar Lake-M)
+#
+# Set power_tuning_enabled: false to remove all changes and restore system defaults.
+
+power_tuning_enabled: true
+
+# tuned profile to override. balanced-battery is what tuned selects on battery.
+power_tuned_profile: balanced-battery
+
+# PCIe ASPM policy. default leaves devices in active state; powersave enables L1 substates.
+power_aspm_policy: powersave
+
+# PCI devices missing runtime PM on this platform (all ship with control=on)
+power_pci_runtime_pm_devices:
+  - id: "0000:55:00.0"
+    desc: "NVMe SSD (SK Hynix)"
+  - id: "0000:00:14.3"
+    desc: "WiFi (Intel BE200, iwlwifi)"
+  - id: "0000:00:14.7"
+    desc: "Bluetooth (btintel_pcie)"
+  - id: "0000:00:12.0"
+    desc: "Intel ISH sensor hub"

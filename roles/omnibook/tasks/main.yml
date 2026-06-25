@@ -1,0 +1,69 @@
+---
+# omnibook role - Power management tuning for HP OmniBook Ultra Flip 14
+
+- name: Read board DMI name
+  ansible.builtin.slurp:
+    src: /sys/class/dmi/id/board_name
+  register: dmi_board
+  changed_when: false
+
+- name: OmniBook tuning (board 8CDE only)
+  when: (dmi_board.content | b64decode | trim) == '8CDE'
+  block:
+    - name: Apply OmniBook power tuning
+      when: power_tuning_enabled
+      block:
+        - name: Create tuned profile override directory
+          ansible.builtin.file:
+            path: /etc/tuned/profiles/{{ power_tuned_profile }}
+            state: directory
+            mode: "0755"
+          become: true
+
+        - name: Deploy tuned profile config
+          ansible.builtin.copy:
+            src: tuned.conf
+            dest: /etc/tuned/profiles/{{ power_tuned_profile }}/tuned.conf
+            mode: "0644"
+          become: true
+          notify: Reload tuned profile
+
+        - name: Deploy tuned profile script
+          ansible.builtin.template:
+            src: script.sh.j2
+            dest: /etc/tuned/profiles/{{ power_tuned_profile }}/script.sh
+            mode: "0755"
+          become: true
+          notify: Reload tuned profile
+
+        - name: Deploy btintel_pcie suspend workaround service
+          ansible.builtin.copy:
+            src: btintel-pcie-suspend.service
+            dest: /etc/systemd/system/btintel-pcie-suspend.service
+            mode: "0644"
+          become: true
+          notify: Enable btintel-pcie suspend workaround
+
+    - name: Remove OmniBook power tuning
+      when: not power_tuning_enabled
+      block:
+        - name: Remove tuned profile override directory
+          ansible.builtin.file:
+            path: /etc/tuned/profiles/{{ power_tuned_profile }}
+            state: absent
+          become: true
+          notify: Reload tuned profile
+
+        - name: Disable and remove btintel_pcie suspend workaround service
+          ansible.builtin.systemd:
+            name: btintel-pcie-suspend.service
+            enabled: false
+            state: stopped
+          become: true
+          ignore_errors: true
+
+        - name: Remove btintel_pcie suspend workaround service file
+          ansible.builtin.file:
+            path: /etc/systemd/system/btintel-pcie-suspend.service
+            state: absent
+          become: true

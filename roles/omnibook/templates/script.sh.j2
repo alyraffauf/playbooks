@@ -1,0 +1,78 @@
+#!/bin/bash
+# tuned profile script - HP OmniBook Ultra Flip 14 (board 8CDE, Lunar Lake-M)
+# Managed by Ansible - roles/omnibook
+#
+# Handles what tuned.conf cannot: ASPM policy, PCI runtime PM, WiFi PSM.
+# State is saved under /run so it's always clean after a reboot.
+
+STATEDIR=/run/tuned-omnibook
+ASPM=/sys/module/pcie_aspm/parameters/policy
+
+PCI_DEVS=(
+{% for dev in power_pci_runtime_pm_devices %}
+    "{{ dev.id }}"  # {{ dev.desc }}
+{% endfor %}
+)
+
+start() {
+    mkdir -p "$STATEDIR"
+
+    # ASPM: save current policy (only on first start to preserve the real previous state)
+    if [[ ! -f "$STATEDIR/aspm_policy" ]]; then
+        grep -oP '\[\K[^\]]+' "$ASPM" > "$STATEDIR/aspm_policy"
+    fi
+    echo "{{ power_aspm_policy }}" > "$ASPM"
+
+    # PCI runtime PM: set control=auto for each device
+    for dev in "${PCI_DEVS[@]}"; do
+        ctl="/sys/bus/pci/devices/$dev/power/control"
+        [[ -f "$ctl" ]] || continue
+        saved="$STATEDIR/$(echo "$dev" | tr ':.' '_')_control"
+        [[ -f "$saved" ]] || cat "$ctl" > "$saved"
+        echo auto > "$ctl"
+    done
+
+    # WiFi PSM: enable per-interface power save
+    for iface in /sys/class/net/wl*/; do
+        name=$(basename "$iface")
+        saved="$STATEDIR/${name}_ps"
+        if [[ ! -f "$saved" ]]; then
+            iw dev "$name" get power_save 2>/dev/null \
+                | grep -oP 'Power save: \K\S+' > "$saved"
+        fi
+        iw dev "$name" set power_save on 2>/dev/null || true
+    done
+}
+
+stop() {
+    [[ -d "$STATEDIR" ]] || return 0
+
+    # Restore ASPM policy
+    if [[ -f "$STATEDIR/aspm_policy" ]]; then
+        cat "$STATEDIR/aspm_policy" > "$ASPM"
+    fi
+
+    # Restore PCI runtime PM
+    for dev in "${PCI_DEVS[@]}"; do
+        ctl="/sys/bus/pci/devices/$dev/power/control"
+        saved="$STATEDIR/$(echo "$dev" | tr ':.' '_')_control"
+        [[ -f "$ctl" ]] && [[ -f "$saved" ]] && cat "$saved" > "$ctl"
+    done
+
+    # Restore WiFi PSM
+    for iface in /sys/class/net/wl*/; do
+        name=$(basename "$iface")
+        saved="$STATEDIR/${name}_ps"
+        if [[ -f "$saved" ]]; then
+            iw dev "$name" set power_save "$(cat "$saved")" 2>/dev/null || true
+        fi
+    done
+
+    rm -rf "$STATEDIR"
+}
+
+case "$1" in
+    start) start ;;
+    stop)  stop  ;;
+    *) echo "Usage: $0 {start|stop}" >&2; exit 1 ;;
+esac

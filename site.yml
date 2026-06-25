@@ -60,3 +60,8 @@
       ansible.builtin.import_role:
         name: flatpak
       tags: flatpak
+
+    - name: Run OmniBook power tuning role
+      ansible.builtin.import_role:
+        name: omnibook
+      tags: omnibook

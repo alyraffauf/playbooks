@@ -1,0 +1,13 @@
+[Unit]
+Description=Unbind btintel_pcie before suspend (Lunar Lake D2 entry bug workaround)
+Before=sleep.target
+StopWhenUnneeded=yes
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/sh -c 'echo 0000:00:14.7 > /sys/bus/pci/drivers/btintel_pcie/unbind'
+ExecStop=/bin/sh -c 'echo 0000:00:14.7 > /sys/bus/pci/drivers/btintel_pcie/bind'
+
+[Install]
+WantedBy=sleep.target
