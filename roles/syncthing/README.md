@@ -32,6 +32,14 @@ Configuration is stored in `vars/syncthing.yml`.
 
 See the examples in `defaults/main.yml` for the structure.
 
+### Config directory
+
+All `syncthing` invocations pass `--home` explicitly
+(`syncthing_config_dir`, default `~/.local/state/syncthing`). This keeps the
+role pointed at the same config as the systemd service even when the caller's
+environment overrides `XDG_STATE_HOME` (e.g. sandboxed app launchers), which
+Syncthing v2 otherwise uses to locate its config.
+
 ## Usage
 
 ### Configure syncthing folders

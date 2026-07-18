@@ -29,3 +29,8 @@ syncthing_folders: {}
 
 # Syncthing service management
 syncthing_service_enabled: true
+
+# Syncthing config/data directory. Passed explicitly via --home so the role
+# targets the same config as the systemd service regardless of the caller's
+# XDG environment (e.g. XDG_STATE_HOME overrides from sandboxed app launchers).
+syncthing_config_dir: "{{ syncthing_home }}/.local/state/syncthing"

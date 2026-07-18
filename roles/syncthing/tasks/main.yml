@@ -58,19 +58,19 @@
 
 - name: Set commands for detected version
   ansible.builtin.set_fact:
-    syncthing_cli_cmd: "{{ syncthing_base_cmd }} cli"
-    syncthing_device_id_cmd: "{{ syncthing_base_cmd }} {{ '--device-id' if syncthing_version.stdout == '1' else 'device-id' }}"
-    syncthing_generate_cmd: "{{ syncthing_base_cmd }} generate{{ ' --no-default-folder' if syncthing_version.stdout == '1' else '' }}"
+    syncthing_cli_cmd: '{{ syncthing_base_cmd }} cli --home "{{ syncthing_config_dir }}"'
+    syncthing_device_id_cmd: '{{ syncthing_base_cmd }} {{ "--device-id" if syncthing_version.stdout == "1" else "device-id" }} --home "{{ syncthing_config_dir }}"'
+    syncthing_generate_cmd: '{{ syncthing_base_cmd }} generate --home "{{ syncthing_config_dir }}"{{ " --no-default-folder" if syncthing_version.stdout == "1" else "" }}'
 
 - name: Ensure Syncthing config directory exists
   ansible.builtin.file:
-    path: "{{ syncthing_home }}/.local/state/syncthing"
+    path: "{{ syncthing_config_dir }}"
     state: directory
     mode: "0755"
 
 - name: Check if Syncthing has been initialized
   ansible.builtin.stat:
-    path: "{{ syncthing_home }}/.local/state/syncthing/config.xml"
+    path: "{{ syncthing_config_dir }}/config.xml"
   register: syncthing_config
 
 - name: Initialize Syncthing configuration
